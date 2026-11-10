@@ -1,5 +1,6 @@
 //! Authentication module
 
+pub mod local_projects;
 pub mod oauth_server;
 pub mod storage;
 pub mod switcher;

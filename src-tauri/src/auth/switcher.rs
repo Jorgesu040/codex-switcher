@@ -62,6 +62,33 @@ pub fn switch_to_account(account: &StoredAccount) -> Result<()> {
     Ok(())
 }
 
+/// Called only by the explicit account-switch flow, never token refresh.
+pub fn rebind_local_projects_for_account(account: &StoredAccount) -> Result<()> {
+    if std::env::var("CODEX_SWITCHER_REBIND_LOCAL_PROJECTS").as_deref() != Ok("1") {
+        return Ok(());
+    }
+    let codex_home = get_codex_home()?;
+    let state_path = codex_home.join(".codex-global-state.json");
+    if !state_path.exists() {
+        return Ok(());
+    }
+    if let AuthData::ChatGPT {
+        id_token,
+        account_id,
+        ..
+    } = &account.auth_data
+    {
+        let original = fs::read(&state_path)?;
+        let state: serde_json::Value = serde_json::from_slice(&original)?;
+        if state.get("electron-account-renderer-state-v1").is_some() {
+            let owner = super::local_projects::renderer_owner(id_token, account_id.as_deref())?;
+            let plan = super::local_projects::plan_rebind(&state, &owner, None)?;
+            super::local_projects::apply_plan(&codex_home, &original, &plan)?;
+        }
+    }
+    Ok(())
+}
+
 /// Create an AuthDotJson structure from a StoredAccount
 fn create_auth_json(account: &StoredAccount) -> Result<AuthDotJson> {
     match &account.auth_data {

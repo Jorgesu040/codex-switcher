@@ -166,6 +166,10 @@ pub async fn switch_account_by_id(account_id: &str) -> Result<(), String> {
         .await
         .map_err(|e| e.to_string())?;
 
+    // A token refresh may have taken time; recheck before touching desktop state.
+    ensure_codex_not_running()?;
+    crate::auth::rebind_local_projects_for_account(&account).map_err(|e| format!("{e:#}"))?;
+
     // Write to ~/.codex/auth.json
     switch_to_account(&account).map_err(|e| e.to_string())?;
 

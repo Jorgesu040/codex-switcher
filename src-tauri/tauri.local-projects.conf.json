@@ -1,0 +1,13 @@
+{
+  "productName": "Codex Switcher Local Projects",
+  "identifier": "com.jorgesu040.codex-switcher-local-projects",
+  "build": { "beforeBuildCommand": "npx --yes pnpm@10 build" },
+  "app": {
+    "windows": [{
+      "label": "main", "title": "Codex Switcher - Local Projects Experiment",
+      "width": 900, "height": 700, "minWidth": 600, "minHeight": 500
+    }]
+  },
+  "bundle": { "createUpdaterArtifacts": false },
+  "plugins": { "updater": { "endpoints": [] } }
+}
